@@ -1,0 +1,25 @@
+
+.like a::before {
+    content: "\f004";
+    width: 20px;
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 5px;
+    transition: color .3s ease;
+    height: 20px;
+}
+.like.liked a::before{
+    color: red;
+}
+.like a:focus{
+    outline: none;
+}
+.entry-content .like a, .entry-content .like a:hover, .entry-content .like a:focus {
+    border: none;
+    box-shadow: none;
+}
+.entry-content{
+    display: flex;
+    flex-direction: column-reverse;
+}
+

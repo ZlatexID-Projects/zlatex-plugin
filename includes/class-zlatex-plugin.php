@@ -78,6 +78,7 @@ class Zlatex_Plugin {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+		$this->ajax_hooks();
 
 	}
 
@@ -122,6 +123,10 @@ class Zlatex_Plugin {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-zlatex-plugin-public.php';
 
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/ajax.php';
+
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/widget.php';
+
 		$this->loader = new Zlatex_Plugin_Loader();
 
 	}
@@ -156,7 +161,13 @@ class Zlatex_Plugin {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-
+		$this->loader->add_action( 'init', $plugin_admin, 'register_post_types' );
+		$this->loader->add_action( 'after_setup_theme', $plugin_admin, 'setup' );
+		$this->loader->add_action('admin_menu',$plugin_admin, 'admin_menu');
+		$this->loader->add_action( 'admin_init',$plugin_admin ,'register_mysettings' );
+		$this->loader->add_filter( 'rest_route_for_post', 'my_plugin_rest_route_for_post', 10, 2 );
+		$this->loader->add_action('add_meta_boxes', $plugin_admin, 'meta_boxes_function');
+		$this->loader->add_action('init', $plugin_admin, 'register_taxonomies');
 	}
 
 	/**
@@ -172,7 +183,18 @@ class Zlatex_Plugin {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_filter( 'template_include',$plugin_public ,'load_custom_page_template' );
+		$this->loader->add_filter('the_content', $plugin_public , 'filter_the_content_in_the_main_loop');
+		$this->loader->add_filter( 'the_content',  $plugin_public, 't5_replace_content_with_excerpt', 100 );
+		$this->loader->add_action('widgets_init',$plugin_public, 'zlatex_reg_widget');
+		
+	}
 
+	private function ajax_hooks (){
+		$plugin_ajax = new ajax();
+		$this->loader->add_action( 'wp_ajax_get_likes', $plugin_ajax ,'getlikes');
+		$this->loader->add_action( 'wp_ajax_add_likes', $plugin_ajax ,'addlikes' );
+		$this->loader->add_action('wp_ajax_remove_likes', $plugin_ajax ,'remove_likes');
 	}
 
 	/**

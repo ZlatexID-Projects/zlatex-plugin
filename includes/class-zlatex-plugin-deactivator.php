@@ -30,7 +30,8 @@ class Zlatex_Plugin_Deactivator {
 	 * @since    1.0.0
 	 */
 	public static function deactivate() {
-
+		$page_id = get_option( 'archive-page' );
+		wp_delete_post( $page_id );
 	}
 
 }

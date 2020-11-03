@@ -20,6 +20,7 @@
  * @subpackage Zlatex_Plugin/public
  * @author     Zlatex <maximzlatogorsky@gmail.com>
  */
+
 class Zlatex_Plugin_Public {
 
 	/**
@@ -40,6 +41,7 @@ class Zlatex_Plugin_Public {
 	 */
 	private $version;
 
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -51,6 +53,8 @@ class Zlatex_Plugin_Public {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
+		$this->page_id = get_option( 'archive-page' );
+		
 
 	}
 
@@ -59,6 +63,17 @@ class Zlatex_Plugin_Public {
 	 *
 	 * @since    1.0.0
 	 */
+	
+	function load_custom_page_template( $page_template )
+	{	
+
+		if ( get_the_ID() == $this->page_id ) {
+			$page_template = dirname( __FILE__ ) . '/partials/archive.php';
+		}else if (is_singular("old_events")){
+			$page_template = dirname( __FILE__ ) . '/partials/archive-post.php';
+		}
+		return $page_template;
+	}
 	public function enqueue_styles() {
 
 		/**
@@ -72,8 +87,11 @@ class Zlatex_Plugin_Public {
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
-
+		
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/zlatex-plugin-public.css', array(), $this->version, 'all' );
+		wp_enqueue_style( 'zlatex_default_styles', plugin_dir_url( __FILE__ ) . 'css/style.css' );
+		wp_enqueue_style( 'zlatex-fa', 'https://use.fontawesome.com/releases/v5.5.0/css/all.css', array( 'zlatex_default_styles' ) );
+
 
 	}
 
@@ -95,9 +113,56 @@ class Zlatex_Plugin_Public {
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
+		
+		if ( get_post_type() == 'old_events') {
+			wp_enqueue_script( 'zlatex_like', plugin_dir_url( __FILE__ ) . 'js/like.js', array(), '1.0', true );
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/zlatex-plugin-public.js', array( 'jquery' ), $this->version, false );
+			wp_localize_script(
+				'zlatex_like',
+				'like',
+				array(
+					'url' => admin_url( 'admin-ajax.php' ),
+				)
+			);
+		}
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/zlatex-plugin-public.js', $this->version, true );
+		wp_localize_script(
+			$this->plugin_name,
+			'postsInfo',
+			array(
+				'showed' => get_option('how-much'),
+			)
+		);
+		wp_enqueue_script( 'zlatex_calendar', plugin_dir_url( __FILE__ ) . 'js/calendar.js', $this->version, true );
+	}
+	public function filter_the_content_in_the_main_loop($content){
+		if ( is_singular() && in_the_loop() && is_main_query() && get_post_type() == 'old_events' ) {
+			return $content . $this->the_like() . $this->id_input();
+		}
+	
+		return $content;
+	}
+	public function zlatex_reg_widget() {
+		register_widget( 'zlatex_widget' );
+	}
+	private function the_like(){ ?>
+		<div class="like"><a href="#">Like <span></span></a></div> 
+		
+		<?php
+	}
+	
+	private function id_input(){
+		?> <input type="hidden" name="postID" id="postID" value="<?php echo get_the_ID(); ?>"> <?php
+	}
+	
 
+	function t5_replace_content_with_excerpt( $content )
+	{	
+		if ( !in_the_loop() )
+		{
+			return get_the_excerpt();
+		}
+		return $content;
 	}
 
 }

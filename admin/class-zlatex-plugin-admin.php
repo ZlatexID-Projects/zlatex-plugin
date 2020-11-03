@@ -20,6 +20,8 @@
  * @subpackage Zlatex_Plugin/admin
  * @author     Zlatex <maximzlatogorsky@gmail.com>
  */
+
+
 class Zlatex_Plugin_Admin {
 
 	/**
@@ -44,13 +46,13 @@ class Zlatex_Plugin_Admin {
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
+	 * @param      string $plugin_name       The name of this plugin.
+	 * @param      string $version    The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
 
 		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+		$this->version     = $version;
 
 	}
 
@@ -98,6 +100,140 @@ class Zlatex_Plugin_Admin {
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/zlatex-plugin-admin.js', array( 'jquery' ), $this->version, false );
 
+	}
+	public function register_post_types() {
+		register_post_type(
+			'old_events',
+			array(
+				'labels'              => array(
+					'name'               => 'Old events', // Основное название типа записи
+					'singular_name'      => 'Old event', // отдельное название записи типа Book
+					'add_new'            => 'Add event',
+					'add_new_item'       => 'Add new event',
+					'edit_item'          => 'Edit event',
+					'new_item'           => 'New event',
+					'view_item'          => 'Watch event',
+					'search_items'       => 'Find event',
+					'not_found'          => 'Events not found',
+					'not_found_in_trash' => 'In trash events not found',
+					'parent_item_colon'  => '',
+					'menu_name'          => 'events',
+
+				),
+				'public'              => true,
+				'show_in_rest'        => true,
+				'publicly_queryable'  => true,
+				'show_ui'             => true,
+				'graphql_single_name' => 'event',
+				'graphql_plural_name' => 'events',
+				'show_in_graphql'     => true,
+				'show_in_menu'        => true,
+				'query_var'           => true,
+				'rewrite'             => true,
+				'capability_type'     => 'post',
+				'has_archive'         => true,
+				'hierarchical'        => false,
+				'menu_position'       => null,
+				'supports'            => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
+			)
+		);
+	}
+	public function register_taxonomies() {
+		register_taxonomy(
+			'importance',
+			'old_events',
+			array(
+				'hierarchical'      => true,
+				'labels'            => array(
+					'name'                       => 'importance',
+					'singular_name'              => 'importance',
+					'search_items'               => __( 'Поиск importance' ),
+					'popular_items'              => __( 'Популярный importance' ),
+					'all_items'                  => __( 'Все importance' ),
+					'parent_item'                => null,
+					'parent_item_colon'          => null,
+					'edit_item'                  => __( 'Редактировать importance' ),
+					'update_item'                => __( 'Обновить importance' ),
+					'add_new_item'               => __( 'Добавить новый importance' ),
+					'new_item_name'              => __( 'Новое название importance' ),
+					'separate_items_with_commas' => __( 'Separate importance with commas' ),
+					'add_or_remove_items'        => __( 'Add or remove importance' ),
+					'choose_from_most_used'      => __( 'Choose from the most used importance' ),
+					'menu_name'                  => __( 'importance' ),
+				),
+				'capabilities'      => array(
+					'assign_terms' => 'manage_options',
+					'edit_terms'   => 'god',
+					'manage_terms' => 'god',
+				),
+				'show_in_nav_menus' => false,
+				'show_ui'           => true,
+				'show_in_menu'      => false,
+
+			)
+		);
+		for ( $i = 1; $i <= 5; $i++ ) {
+			if ( ! term_exists( strval( $i ), 'importance' ) ) {
+				wp_insert_term( strval( $i ), 'importance' );
+			}
+		}
+	}
+	public function meta_boxes_function() {
+
+	}
+	public function setup() {
+		add_theme_support( 'post-thumbnails' );
+	}
+	public function register_mysettings() {
+		// whitelist options
+		register_setting( 'old-events-settings-group', 'how-much' );
+		register_setting( 'old-events-settings-group', 'lm-or-pg' );
+	}
+	public function admin_menu() {
+		add_menu_page( 'Дополнительные настройки Events', 'Old Events', 'manage_options', 'old-events-options', 'add_my_setting', '', 4 );
+		function add_my_setting() {
+			?>
+			<div class="wrap">
+				<h2><?php echo get_admin_page_title(); ?></h2>
+		
+				<?php
+				// settings_errors() не срабатывает автоматом на страницах отличных от опций
+				if ( get_current_screen()->parent_base !== 'options-general' ) {
+					settings_errors( 'old-events-options' );
+				}
+				?>
+		
+				<form action="options.php" method="POST">
+				<h3><label for="how-much">skolko vivodit postov?</label></h3>
+				<input type="number" name="how-much" value="<?php echo get_option( 'how-much' ) ? get_option( 'how-much' ) : 3; ?>" min="1" class="small-text" id="how-much" />
+				<h3><label>Pagination or Load more?</label></h3>
+		<p><input name="lm-or-pg" type="radio" value="Load More" id="lm" 
+			<?php
+			if ( get_option( 'lm-or-pg' ) == 'Load More' ) {
+				?>
+			 checked <?php } ?>><label for="lm">Load More</label> </p>
+				<p><input name="lm-or-pg" type="radio" value="Pagination" id="pg" 
+				<?php
+				if ( get_option( 'lm-or-pg' ) == 'Pagination' ) {
+					?>
+					 checked <?php } ?>><label for="pg">Pagination</label></p>
+					<?php
+						settings_fields( 'old-events-settings-group' );     // скрытые защитные поля
+						do_settings_sections( 'old-events-settings-group' ); // секции с настройками (опциями).
+						submit_button();
+					?>
+				</form>
+			</div>
+			<?php
+
+		}
+	}
+	public function my_plugin_rest_route_for_post( $route, $post ) {
+		if ( $post->post_type === 'old_events' ) {
+			$route = '/wp/v2/old_events/' . $post->ID;
+		}
+
+		return $route;
 	}
 
 }
