@@ -49,7 +49,7 @@ class Calendar {
     }
     getMonth(number) {
         let mounths = [
-            "",
+            
             "January",
             "February",
             "March",
@@ -63,7 +63,7 @@ class Calendar {
             "November",
             "December",
         ];
-        return mounths[number];
+        return mounths[number-1];
     }
     generetaCalendar() {
         const table = this.table;

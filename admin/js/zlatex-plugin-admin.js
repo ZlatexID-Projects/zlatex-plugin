@@ -1,4 +1,4 @@
-(function( $ ) {
+(function(  ) {
 	'use strict';
 
 	/**
@@ -29,4 +29,20 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
-})( jQuery );
+	const submitButton = document.querySelector(".old-events_page_generate-short-code #submit");
+	submitButton.addEventListener("click",(e)=>{
+		e.preventDefault();
+		const importance = document.querySelector("input#importance").value;
+
+		const postsNumber = document.querySelector("input#posts-number").value;
+
+		const fromDate = document.querySelector("input#from-date").value;
+
+		const toDate = document.querySelector("input#to-date").value;
+
+		const shortCode = document.querySelector("input#shortcode");
+
+		shortCode.value = `[events importance="${importance}"${postsNumber ? ` last="${postsNumber}"`:""}${fromDate ? ` fromdate="${fromDate}"` : ""}${toDate ? ` todate="${toDate}"` : ""}]`;
+
+	})
+})( );

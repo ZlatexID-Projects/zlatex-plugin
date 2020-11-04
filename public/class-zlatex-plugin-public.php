@@ -89,6 +89,11 @@ class Zlatex_Plugin_Public {
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/zlatex-plugin-public.css', array(), $this->version, 'all' );
 		wp_enqueue_style( 'zlatex_default_styles', plugin_dir_url( __FILE__ ) . 'css/style.css' );
 		wp_enqueue_style( 'zlatex-fa', 'https://use.fontawesome.com/releases/v5.5.0/css/all.css', array( 'zlatex_default_styles' ) );
+		global $post;
+		$post_slug = $post->post_name;
+		if(is_singular("old_events") || $post_slug == "archive"){
+			wp_add_inline_style($this->plugin_name,get_option( 'custom-css' ));
+		}
 
 	}
 

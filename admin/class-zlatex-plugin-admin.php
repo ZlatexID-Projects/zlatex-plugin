@@ -99,7 +99,7 @@ class Zlatex_Plugin_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/zlatex-plugin-admin.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/zlatex-plugin-admin.js', array( 'jquery' ), $this->version, true );
 
 	}
 	public function register_post_types() {
@@ -210,9 +210,11 @@ class Zlatex_Plugin_Admin {
 		// whitelist options
 		register_setting( 'old-events-settings-group', 'how-much' );
 		register_setting( 'old-events-settings-group', 'lm-or-pg' );
+		register_setting( 'old-events-settings-group', 'custom-css' );
 	}
 	public function admin_menu() {
 		add_menu_page( 'Дополнительные настройки Events', 'Old Events', 'manage_options', 'old-events-options', 'add_my_setting', '', 4 );
+		add_submenu_page( 'old-events-options', 'Generate short code', 'Short Code', 'manage_options', 'generate-short-code', 'generateShortcodePage', 1 );
 		function add_my_setting() {
 			?>
 			<div class="wrap">
@@ -239,6 +241,8 @@ class Zlatex_Plugin_Admin {
 				if ( get_option( 'lm-or-pg' ) == 'Pagination' ) {
 					?>
 					 checked <?php } ?>><label for="pg">Pagination</label></p>
+					 <h3><label for="custom-css">Custom CSS</label></h3>
+					 <textarea name="custom-css" id="custom-css" cols="90" rows="30"><?php echo get_option( 'custom-css' ) ?></textarea>
 					<?php
 						settings_fields( 'old-events-settings-group' );     // скрытые защитные поля
 						do_settings_sections( 'old-events-settings-group' ); // секции с настройками (опциями).
@@ -249,7 +253,39 @@ class Zlatex_Plugin_Admin {
 			<?php
 
 		}
-	}
+		function generateShortcodePage(){
+			?>
+			<div class="wrap">
+				<h2><?php echo get_admin_page_title(); ?></h2>
+		
+				<?php
+				// settings_errors() не срабатывает автоматом на страницах отличных от опций
+				if ( get_current_screen()->parent_base !== 'options-general' ) {
+					settings_errors( 'old-events-options' );
+				}
+				?>
+		
+				<form action="options.php" method="POST">
+				<h3><label for="importance">Importance</label></h3>
+				<input type="number" min="1" value="1" name="importance" id="importance">
+				<h3><label for="posts-number">Сколько выводить постов?</label></h3>
+				<input type="number" name="posts-number" id="posts-number">
+				<h3><label for="from-date">FROM DATE</label></h3>
+				<input type="date" name="from-date" id="from-date">
+				<h3><label for="to-date">TO DATE</label></h3>
+				<input type="date" name="to-date" id="to-date">
+				<h3><label>FROM DATE</label></h3>
+				<input style="width: 1000px;" type="text" id="shortcode" readonly value="123"> 
+					<?php
+						submit_button("Get Shortcode");
+					?>
+				</form>
+			</div>
+			<?php
+
+		}
+		}
+	
 	public function my_plugin_rest_route_for_post( $route, $post ) {
 		if ( $post->post_type === 'old_events' ) {
 			$route = '/wp/v2/old_events/' . $post->ID;
@@ -258,7 +294,7 @@ class Zlatex_Plugin_Admin {
 		return $route;
 	}
 	public function addShortcode(){
-		add_shortcode('test', function ($atts){
+		add_shortcode('events', function ($atts){
 			$args = array(
 				"post_type" => "old_events",
 				"posts_per_page" => isset($atts["fromdate"]) && isset($atts["todate"]) ? -1 : $atts["last"] | 5
