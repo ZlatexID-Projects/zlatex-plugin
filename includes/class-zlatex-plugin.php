@@ -167,7 +167,9 @@ class Zlatex_Plugin {
 		$this->loader->add_action( 'admin_init',$plugin_admin ,'register_mysettings' );
 		$this->loader->add_filter( 'rest_route_for_post', 'my_plugin_rest_route_for_post', 10, 2 );
 		$this->loader->add_action('add_meta_boxes', $plugin_admin, 'meta_boxes_function');
+		$this->loader->add_action('save_post', $plugin_admin, 'post_saved');
 		$this->loader->add_action('init', $plugin_admin, 'register_taxonomies');
+		//save_post
 	}
 
 	/**
@@ -192,9 +194,16 @@ class Zlatex_Plugin {
 
 	private function ajax_hooks (){
 		$plugin_ajax = new ajax();
+		//nopriv
 		$this->loader->add_action( 'wp_ajax_get_likes', $plugin_ajax ,'getlikes');
 		$this->loader->add_action( 'wp_ajax_add_likes', $plugin_ajax ,'addlikes' );
 		$this->loader->add_action('wp_ajax_remove_likes', $plugin_ajax ,'remove_likes');
+		$this->loader->add_action('wp_ajax_get_events', $plugin_ajax ,'get_events');
+
+		$this->loader->add_action( 'wp_ajax_nopriv_get_likes', $plugin_ajax ,'getlikes');
+		$this->loader->add_action( 'wp_ajax_nopriv_add_likes', $plugin_ajax ,'addlikes' );
+		$this->loader->add_action('wp_ajax_nopriv_remove_likes', $plugin_ajax ,'remove_likes');
+		$this->loader->add_action('wp_ajax_nopriv_get_events', $plugin_ajax ,'get_events');
 	}
 
 	/**

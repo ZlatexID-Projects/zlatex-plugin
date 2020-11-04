@@ -53,7 +53,8 @@ class Zlatex_Plugin_Admin {
 
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
-
+		
+		$this->addShortcode();
 	}
 
 	/**
@@ -179,7 +180,28 @@ class Zlatex_Plugin_Admin {
 		}
 	}
 	public function meta_boxes_function() {
+	$screens = array( 'old_events' );
 
+    foreach ( $screens as $screen ) {
+        add_meta_box(
+            'date',
+            __( 'Date', 'zlatex-plugin' ),
+            function(){
+				?><input type="date" name="getDate" value="<?php 
+				echo date("Y-m-d", get_post_meta(get_the_ID(),"EventDate")[0]) ?>"> <?php
+			},
+			$screen,
+			'side'
+        );
+    }
+	}
+	public function post_saved($post_ID){
+		if($_POST["getDate"]){
+			$orgDate = $_POST["getDate"];
+			$newDate = date("d/m/Y", strtotime($orgDate));
+			update_post_meta($post_ID,"EventDate",strtotime($orgDate));
+			
+		}
 	}
 	public function setup() {
 		add_theme_support( 'post-thumbnails' );
@@ -234,6 +256,39 @@ class Zlatex_Plugin_Admin {
 		}
 
 		return $route;
+	}
+	public function addShortcode(){
+		add_shortcode('test', function ($atts){
+			$args = array(
+				"post_type" => "old_events",
+				"posts_per_page" => isset($atts["fromdate"]) && isset($atts["todate"]) ? -1 : $atts["last"] | 5
+			);
+			$q = new WP_Query($args);
+			if ( $q->have_posts() && is_singular() && in_the_loop()) {
+				
+				while ($q->have_posts() ) {
+					$q->the_post();
+					$showed = false;
+					if($atts["importance"]){
+						foreach(get_the_terms(get_the_ID(),"importance") as $term){
+							if($term->name >= $atts["importance"]){
+								$showed = true;
+							}
+						}
+					}
+					$post_date = get_post_meta(get_the_ID(),"EventDate")[0];
+					if(strtotime($atts["fromdate"]) <= $post_date && strtotime($atts["todate"]) >= $post_date && $showed){
+						?> <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a> <?php
+					}else if( !$atts["fromdate"] && !$atts["todate"] && $atts["last"] && $showed){
+						?> <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a> <?php
+					}
+					
+
+				}
+			}
+
+		});
+
 	}
 
 }

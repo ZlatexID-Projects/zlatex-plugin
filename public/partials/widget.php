@@ -35,21 +35,6 @@ class zlatex_widget extends WP_Widget
 
 		<h2 class="text-primary text-center classes-header"><?php echo $args['before_title'] . esc_html($instance['title']) . $args['after_title']; ?></h2>
 		<div class="calendar-old-events">
-			<!-- <table>
-				<caption>Таблица размеров обуви</caption>
-				<tr>
-					<th>Россия</th>
-					<th>Великобритания</th>
-					<th>Европа</th>
-					<th>Длина ступни, см</th>
-				</tr>
-				<tr>
-					<td>34,5</td>
-					<td>3,5</td>
-					<td>36</td>
-					<td>23</td>
-				</tr>
-			</table> -->
 		</div>
 
 

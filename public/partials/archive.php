@@ -1,9 +1,18 @@
 <?php
+if(!$_GET["date"]){
 $args       = array(
 	'post_type' => 'old_events',
 	'posts_per_page' => get_option('how-much'),
 	'paged' => get_query_var('paged') && get_option('lm-or-pg') == "Pagination" ? get_query_var('paged') : 1
 );
+}else{
+	$args       = array(
+		'post_type' => 'old_events',
+		'posts_per_page' => -1,
+
+	);	
+}
+
 $old_events = new WP_Query($args);
 get_header(); ?>
 <div class="wrap">
@@ -21,21 +30,30 @@ get_header(); ?>
 		<main id="main" class="site-main" role="main">
 
 			<?php
+			
 			if ( $old_events->have_posts() ) :
 
 				// Start the Loop.
 				while ($old_events->have_posts() ) :
+					
 					$old_events->the_post();
-
+					if($_GET["date"]){
+						if(strtotime($_GET["date"]) == get_post_meta(get_the_ID(),"EventDate")[0]){
+							get_template_part( 'template-parts/post/content', get_post_format() );
+						}
+					}else{
+						get_template_part( 'template-parts/post/content', get_post_format() );
+					}
 					/*
 					 * Include the Post-Format-specific template for the content.
 					 * If you want to override this in a child theme, then include a file
 					 * called content-___.php (where ___ is the Post Format name) and that
 					 * will be used instead.
 					 */
-					get_template_part( 'template-parts/post/content', get_post_format() );
+					
 
 				endwhile;
+				if(!$_GET["date"]){
 				?>	
 			
 			<p class="pagination"><?php 
@@ -50,6 +68,7 @@ get_header(); ?>
 				?></p><?php }else { ?>
 					<a href="#" id="loadMore">Load More</a>
 				<?php }
+				}
 			wp_reset_postdata();
 
 			else :
@@ -66,4 +85,12 @@ get_header(); ?>
 
 
 <?php
+
 get_footer();
+if($_GET["date"]){
+	?>
+	<script>
+	document.body.classList.add("has-sidebar","blog")
+	</script>
+	<?php
+}

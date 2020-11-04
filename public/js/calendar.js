@@ -1,16 +1,17 @@
 class Calendar {
-    constructor(calendarDiv) {
-
+    constructor(calendarDiv, events) {
         Date.prototype.normalSukaGetDay = function () {
             var day = this.getDay();
             return day == 0 ? 6 : day - 1;
         };
 
+        this.events = events;
+
         this.CalendarNODE = calendarDiv;
         this.CalendarNODE.style.position = "relative";
-        
+
         this.currentYear = new Date().getFullYear();
-        this.currentMounth = new Date().getMonth();
+        this.currentMounth = new Date().getMonth() + 1;
         this.datesInCurrentMounth = this.getDaysInMounth(
             this.currentYear,
             this.currentMounth
@@ -22,19 +23,18 @@ class Calendar {
         this.table = document.createElement("table");
         this.table.style.userSelect = "none";
 
-        this.infoDiv = document.createElement("div")
+        this.infoDiv = document.createElement("div");
         this.infoDiv.style.display = "flex";
         this.infoDiv.style.justifyContent = "space-between";
         this.CalendarNODE.appendChild(this.infoDiv);
 
         this.mounth = document.createElement("h2");
         this.infoDiv.appendChild(this.mounth);
-        
+
         this.year = document.createElement("h2");
         this.year.textContent = this.currentYear;
         this.year.style.padding = 0;
         this.infoDiv.appendChild(this.year);
-
     }
     getDaysInMounth(year, mounth) {
         return new Date(year, mounth, 0).getDate();
@@ -47,8 +47,22 @@ class Calendar {
 
         return days[date];
     }
-    getMonth(number){
-        let mounths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    getMonth(number) {
+        let mounths = [
+            "",
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ];
         return mounths[number];
     }
     generetaCalendar() {
@@ -70,22 +84,37 @@ class Calendar {
                 }
                 if ((i == 1 && k < this.DateStartAt) || day > this.datesInCurrentMounth)
                     continue;
+                const curentDate = new Date(this.currentYear, this.currentMounth, day);
+                const event = this.events.find(
+                    (d) =>
+                        d.customDate.getDate() == curentDate.getDate() &&
+                        d.customDate.getFullYear() == curentDate.getFullYear() &&
+                        d.customDate.getMonth() == curentDate.getMonth()
+                );
+                if (event) {
+                    const a = document.createElement("a");
+                    const d = event.oldDate.split("/");
+
+                    a.href = `/archive/?date=${d[2]}-${d[1]}-${d[0]}`;
+                    a.textContent = day;
+                    td.appendChild(a);
+                    a.style.color = "red";
+                }else
                 td.textContent = day;
                 day++;
             }
         }
-       
 
         const mounthText = this.getMonth(this.currentMounth);
-        
+
         this.mounth.textContent = mounthText;
 
         this.CalendarNODE.appendChild(table);
 
         if (!this.foterCreated) this.createFooter();
     }
-    createFooter(){
-        const div = this.footerDiv = document.createElement("div");
+    createFooter() {
+        const div = (this.footerDiv = document.createElement("div"));
         div.style.display = "flex";
         div.style.justifyContent = "space-between";
 
@@ -118,7 +147,7 @@ class Calendar {
         div.appendChild(back);
         div.appendChild(next);
 
-        back.style.fontSize = next.style.fontSize = "16px"
+        back.style.fontSize = next.style.fontSize = "16px";
         back.style.padding = next.style.padding = "10px";
         back.style.border = next.style.border = "none";
         back.style.boxShadow = next.style.boxShadow = "none";
@@ -130,56 +159,55 @@ class Calendar {
         back.addEventListener("click", () => this.back());
         next.addEventListener("click", () => this.next());
 
-        
         return div;
     }
-    SelectYearNode (){
+    SelectYearNode() {
         const div = document.createElement("div");
 
         const select = document.createElement("select");
         select.style.userSelect = "none";
 
-        for (let i = 2010; i <= this.currentYear + 10; i++){
+        for (let i = 2010; i <= this.currentYear + 10; i++) {
             const year = i;
 
             const option = document.createElement("option");
             option.value = year;
             option.textContent = year;
 
-            if(i == 0) option.selected = true;
+            if (i == 0) option.selected = true;
 
             select.appendChild(option);
         }
         select.selectedIndex = 10;
 
-        select.addEventListener("change",(e)=>{
+        select.addEventListener("change", (e) => {
             this.currentYear = "20" + (select.selectedIndex + 10);
             this.preGenerate();
-        })
+        });
 
         div.appendChild(select);
 
         return div;
     }
     next() {
-        if (this.currentMounth == 11) {
-            this.currentYear += 1;
-            this.currentMounth = 0;
+        if (this.currentMounth == 12) {
+            this.currentYear = +this.currentYear + 1;
+            this.currentMounth = 1;
         } else {
             this.currentMounth += 1;
         }
         this.preGenerate();
     }
     back() {
-        if (this.currentMounth == 0) {
-            this.currentYear -= 1;
-            this.currentMounth = 11;
+        if (this.currentMounth == 1) {
+            this.currentYear = +this.currentYear - 1;
+            this.currentMounth = 12;
         } else {
             this.currentMounth -= 1;
         }
         this.preGenerate();
     }
-    preGenerate(){
+    preGenerate() {
         this.datesInCurrentMounth = this.getDaysInMounth(
             this.currentYear,
             this.currentMounth
@@ -194,8 +222,30 @@ class Calendar {
     }
 }
 
-
 document.addEventListener("DOMContentLoaded", async () => {
     const calendarDiv = document.querySelector(".calendar-old-events");
-    new Calendar(calendarDiv).generetaCalendar();
+
+    if (!ajaxURL) return;
+    var data = new FormData();
+    data.append("action", `get_events`);
+    const res = await fetch(ajaxURL, {
+        method: "POST",
+        body: data,
+    });
+    const events = await res.json();
+
+    var dates = [];
+    // for await (ev of events) {
+    //     var date = ev.customDate.split("/");
+    //     dates.push(new Date(date[2], +date[1] - 1, date[0]));
+    // }
+    let i = 0;
+    for await (ev of events){
+        var date = ev.customDate.split("/");
+
+        events[i].oldDate = ev.customDate;
+        events[i].customDate = new Date(date[2], +date[1], date[0]);
+        i++;
+    }
+    new Calendar(calendarDiv, events).generetaCalendar();
 });
