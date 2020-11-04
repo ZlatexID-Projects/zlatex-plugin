@@ -80,6 +80,8 @@ class Zlatex_Plugin {
 		$this->define_public_hooks();
 		$this->ajax_hooks();
 
+		
+
 	}
 
 	/**
@@ -126,6 +128,8 @@ class Zlatex_Plugin {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/ajax.php';
 
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/widget.php';
+
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-cli.php';
 
 		$this->loader = new Zlatex_Plugin_Loader();
 
