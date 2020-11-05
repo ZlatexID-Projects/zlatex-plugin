@@ -87,10 +87,10 @@ get_header(); ?>
 <?php
 
 get_footer();
-if($_GET["date"]){
+// if($_GET["date"]){
 	?>
 	<script>
 	document.body.classList.add("has-sidebar","blog")
 	</script>
 	<?php
-}
+// }

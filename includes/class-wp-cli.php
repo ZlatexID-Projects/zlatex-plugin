@@ -74,7 +74,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					'description' => 'Whether or not to greet the person with success or error.',
 					'optional'    => false,
 					'default'     => '0',
-					'options'     => array( '1', '2', '3', '4', '5' ),
+					'options'     => array( '0','1', '2', '3', '4', '5' ),
 				),
 			),
 			'when'      => 'after_wp_load',

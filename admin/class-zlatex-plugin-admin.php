@@ -138,6 +138,8 @@ class Zlatex_Plugin_Admin {
 				'supports'            => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
 			)
 		);
+		add_post_type_support( 'old_events', 'excerpt' );
+
 	}
 	public function register_taxonomies() {
 		register_taxonomy(

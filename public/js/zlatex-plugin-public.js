@@ -1,7 +1,9 @@
-let showed = 2;
+let showed,lenght;
+showed = 2;
 let maxCOntent;
 let step = 3;
 let after;
+
 class Post {
 	constructor(id, title,postLink, imgLink, content){
 		this.article = document.createElement("article");
@@ -77,7 +79,7 @@ var graphFetch = (query) => {
 			});
 		});
 	});
-};
+};	
 // Save after and fet content length
 (async function(){
 	if (!postsInfo) return
@@ -92,18 +94,21 @@ var graphFetch = (query) => {
 				}
 			}
 			`
-	}	
-	var cursors = await await graphFetch(q);
+	}
+	var cursors = await graphFetch(q);
+	lenght = cursors.data.events.edges.length;
 	maxCOntent = cursors.data.events.edges.length;
-	after = cursors.data.events.edges[postsInfo.showed - 1].cursor
+	after = cursors.data.events.edges[postsInfo.showed - 1].cursor 
 })();
 
 document.addEventListener('DOMContentLoaded', ()=>{ 
 	if(!postsInfo) return;
 	showed = step = +postsInfo.showed;
 	var loadMore = document.querySelector("#loadMore");
+	console.log(lenght);
 	if (!loadMore) return;
-	document.body.classList.add("has-sidebar","blog")
+	if(lenght <= showed) loadMore.remove();
+	// document.body.classList.add("has-sidebar","blog")
 	loadMore.addEventListener("click",async (e)=>{		
 		e.preventDefault();
 		var query = {
