@@ -39,10 +39,10 @@ get_header(); ?>
 					$old_events->the_post();
 					if($_GET["date"]){
 						if(strtotime($_GET["date"]) == get_post_meta(get_the_ID(),"EventDate")[0]){
-							get_template_part( 'template-parts/post/content', get_post_format() );
+							zl_get_template_part( 'template-parts/post/content', get_post_format() );
 						}
 					}else{
-						get_template_part( 'template-parts/post/content', get_post_format() );
+						zl_get_template_part( 'template-parts/post/content', get_post_format() );
 					}
 					/*
 					 * Include the Post-Format-specific template for the content.
@@ -73,7 +73,7 @@ get_header(); ?>
 
 			else :
 
-				get_template_part( 'template-parts/post/content', 'none' );
+				zl_get_template_part( 'template-parts/post/content', 'none' );
 
 			endif;
 			?>

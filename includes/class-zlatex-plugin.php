@@ -131,6 +131,8 @@ class Zlatex_Plugin {
 
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-cli.php';
 
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/template-part.php';
+
 		$this->loader = new Zlatex_Plugin_Loader();
 
 	}
