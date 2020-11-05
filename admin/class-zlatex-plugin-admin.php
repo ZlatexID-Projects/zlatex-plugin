@@ -190,7 +190,8 @@ class Zlatex_Plugin_Admin {
             __( 'Date', 'zlatex-plugin' ),
             function(){
 				?><input type="date" name="getDate" value="<?php 
-				echo date("Y-m-d", get_post_meta(get_the_ID(),"EventDate")[0]) ?>"> <?php
+				$post_meta = get_post_meta(get_the_ID(),"EventDate")[0];
+				echo $post_meta ? date("Y-m-d", $post_meta) : date("Y-m-d") ?>"> <?php
 			},
 			$screen,
 			'side'
