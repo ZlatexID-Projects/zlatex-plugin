@@ -201,9 +201,7 @@ class Zlatex_Plugin_Admin {
 	public function post_saved($post_ID){
 		if($_POST["getDate"]){
 			$orgDate = $_POST["getDate"];
-			$newDate = date("d/m/Y", strtotime($orgDate));
 			update_post_meta($post_ID,"EventDate",strtotime($orgDate));
-			
 		}
 	}
 	public function setup() {
