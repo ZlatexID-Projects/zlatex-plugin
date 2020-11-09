@@ -29,6 +29,34 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
+	const postAdder = new Choices('.post-search',{
+		removeItemButton: true,
+	});
+	postAdder.passedElement.element.addEventListener('addItem', function (e){
+		var d = new FormData();
+		d.append("action", "add_post_to_event");
+		d.append("id",localize.post_id);
+		d.append("post_id",e.detail.value);
+		d.append("post_title",e.detail.label);
+		fetch(localize.url, {
+			method: "POST",
+			body: d,
+		});
+		console.log();
+		// console.log(e.detail.value);
+	});
+	postAdder.passedElement.element.addEventListener('removeItem', function (e){
+		var d = new FormData();
+		d.append("action", "remove_post_from_event");
+		d.append("id",localize.post_id);
+		d.append("post_id",e.detail.value);
+		fetch(localize.url, {
+			method: "POST",
+			body: d,
+		});
+		console.log();
+		// console.log(e.detail.value);
+	});
 	const submitButton = document.querySelector(".old-events_page_generate-short-code #submit");
 	if (submitButton) submitButton.addEventListener("click",(e)=>{
 		e.preventDefault();
@@ -67,38 +95,14 @@
 		});
 		persons = await response.json();
 		if(!$inputsDivList) return;
+		if(!persons) return
 		for (let i = 0; i < persons.name.length; i++ ){
 			new PersonInputBox(persons.name[i],persons.surname[i],persons.link[i]).appendToElement($inputsDivList);
 		}
 	} 
-	const postAdder = new Choices('.post-search',{
-		removeItemButton: true,
-	});
-	postAdder.passedElement.element.addEventListener('addItem', function (e){
-		var d = new FormData();
-		d.append("action", "add_post_to_event");
-		d.append("id",localize.post_id);
-		d.append("post_id",e.detail.value);
-		d.append("post_title",e.detail.label);
-		fetch(localize.url, {
-			method: "POST",
-			body: d,
-		});
-		console.log();
-		// console.log(e.detail.value);
-	});
-	postAdder.passedElement.element.addEventListener('removeItem', function (e){
-		var d = new FormData();
-		d.append("action", "remove_post_from_event");
-		d.append("id",localize.post_id);
-		d.append("post_id",e.detail.value);
-		fetch(localize.url, {
-			method: "POST",
-			body: d,
-		});
-		console.log();
-		// console.log(e.detail.value);
-	});
+	
+	
+	
 	// var d = new FormData();
 	// d.append("name", "h");
 	// d.append("importance",3);
@@ -109,7 +113,6 @@
 	// 		importance : 3
 	// 	}
 	// }
-))
 	
 })( );
 class PersonInputBox {

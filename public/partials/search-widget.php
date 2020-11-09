@@ -30,9 +30,28 @@ class zl_search_widget extends WP_Widget
 	{
 		echo $args['before_widget'];
 ?>
-
+		
 		<h2 class="text-primary text-center classes-header"><?php echo $args['before_title'] . esc_html($instance['title']) . $args['after_title']; ?></h2>
-		<div class="calendar-old-events">
+		<div class="search">
+			<input type="text" class="serch-value">
+			<p>
+			<button class="serch-events-btn">search</button>
+			</p>
+			<p>
+			1<input type="radio" checked name="importance" value="1" id="imp1">
+			2<input type="radio" name="importance" value="2" id="imp2">
+			3<input type="radio" name="importance" value="3" id="imp3">
+			4<input type="radio" name="importance" value="4" id="imp4">
+			5<input type="radio" name="importance" value="5" id="imp5">
+			</p>
+			<p>
+				<label for="from_date">From Date</label>
+				<input type="date" name="from_date" id="from_date">
+			</p>
+			<p>
+				<label for="to_date">From Date</label>
+				<input type="date" name="to_date" id="to_date">
+			</p>
 		</div>
 
 

@@ -156,6 +156,7 @@ class Zlatex_Plugin_Public {
 	}
 	public function zlatex_reg_widget() {
 		register_widget( 'zlatex_widget' );
+		register_widget( 'zl_search_widget' );
 	}
 	private function the_like(){ ?>
 		<div class="like"><a href="#">Like <span></span></a></div> 
