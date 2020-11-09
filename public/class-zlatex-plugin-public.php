@@ -89,6 +89,8 @@ class Zlatex_Plugin_Public {
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/zlatex-plugin-public.css', array(), $this->version, 'all' );
 		wp_enqueue_style( 'zlatex_default_styles', plugin_dir_url( __FILE__ ) . 'css/style.css' );
 		wp_enqueue_style( 'zlatex-fa', 'https://use.fontawesome.com/releases/v5.5.0/css/all.css', array( 'zlatex_default_styles' ) );
+
+
 		global $post;
 		$post_slug = $post->post_name;
 		if(is_singular("old_events") || $post_slug == "archive"){
@@ -127,6 +129,15 @@ class Zlatex_Plugin_Public {
 				)
 			);
 		}
+		
+		wp_enqueue_script( 'zlatex_calendar', plugin_dir_url( __FILE__ ) . 'js/calendar.js', $this->version, true );
+		wp_localize_script(
+			'zlatex_calendar',
+			'ajaxURL',
+			admin_url( 'admin-ajax.php' )
+		);
+
+
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/zlatex-plugin-public.js', $this->version, true );
 		wp_localize_script(
 			$this->plugin_name,
@@ -134,12 +145,6 @@ class Zlatex_Plugin_Public {
 			array(
 				'showed' => get_option( 'how-much' ),
 			)
-		);
-		wp_enqueue_script( 'zlatex_calendar', plugin_dir_url( __FILE__ ) . 'js/calendar.js', $this->version, true );
-		wp_localize_script(
-			'zlatex_calendar',
-			'ajaxURL',
-			admin_url( 'admin-ajax.php' )
 		);
 	}
 	public function filter_the_content_in_the_main_loop( $content ) {

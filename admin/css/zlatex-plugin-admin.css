@@ -2,3 +2,25 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+ #important_persons .inside .button-add-input.blue{
+     color: #016087 ;
+     border-color: #016087 ;
+     background: white;
+     transition: all .3s ease;
+     outline: none;
+ }
+
+ #important_persons .inside .button-add-input.blue:hover{
+    background-color: #016087;
+    color: white;
+ }
+ #important_persons .inside .input-block{
+     margin: 10px;
+ }
+
+ #important_persons .inside .input-block input,  #important_persons .inside .input-block .button{
+     margin: 5px;
+ }
+ .choices{
+    padding-right: 20px;
+ }

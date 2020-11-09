@@ -126,12 +126,18 @@ class Zlatex_Plugin {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-zlatex-plugin-public.php';
 
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/ajax.php';
+		
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/ajax.php';
 
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/widget.php';
+
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/partials/search-widget.php';
 
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-cli.php';
 
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/template-part.php';
+
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'includes/rest-api.php';
 
 		$this->loader = new Zlatex_Plugin_Loader();
 
@@ -210,6 +216,12 @@ class Zlatex_Plugin {
 		$this->loader->add_action( 'wp_ajax_nopriv_add_likes', $plugin_ajax ,'addlikes' );
 		$this->loader->add_action('wp_ajax_nopriv_remove_likes', $plugin_ajax ,'remove_likes');
 		$this->loader->add_action('wp_ajax_nopriv_get_events', $plugin_ajax ,'get_events');
+
+		// $plugin_admin_ajax = new admin_ajax();
+		$this->loader->add_action( 'wp_ajax_get_persons', $plugin_ajax ,'get_persons');
+		$this->loader->add_action( 'wp_ajax_add_post_to_event', $plugin_ajax ,'add_post_to_event');
+		$this->loader->add_action( 'wp_ajax_remove_post_from_event', $plugin_ajax ,'remove_post_from_event');
+
 	}
 
 	/**

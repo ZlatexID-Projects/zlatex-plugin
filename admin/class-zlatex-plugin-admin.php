@@ -53,7 +53,7 @@ class Zlatex_Plugin_Admin {
 
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
-		
+
 		$this->addShortcode();
 	}
 
@@ -77,6 +77,8 @@ class Zlatex_Plugin_Admin {
 		 */
 
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/zlatex-plugin-admin.css', array(), $this->version, 'all' );
+		// wp_enqueue_style("choiser-base",'https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/base.min.css',array(),'9.0.1');
+		wp_enqueue_style("choiser",'https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css','9.0.1');
 
 	}
 
@@ -99,7 +101,21 @@ class Zlatex_Plugin_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/zlatex-plugin-admin.js', array( 'jquery' ), $this->version, true );
+		wp_enqueue_script("choiser",'https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js',array(),'9.0.1',true);
+
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/zlatex-plugin-admin.js', array( 'jquery', 'choiser' ), $this->version, true );
+		global $post;
+		wp_localize_script(
+			$this->plugin_name,
+			'localize',
+			array (
+				"url" => admin_url( 'admin-ajax.php' ),
+				"post_id" => $post->ID
+			)
+		);
+		
+		//json_encode(get_post_meta( get_the_ID(), 'boxes' )[0])
+
 
 	}
 	public function register_post_types() {
@@ -182,26 +198,88 @@ class Zlatex_Plugin_Admin {
 		}
 	}
 	public function meta_boxes_function() {
-	$screens = array( 'old_events' );
+		$screens = array( 'old_events' );
 
-    foreach ( $screens as $screen ) {
-        add_meta_box(
-            'date',
-            __( 'Date', 'zlatex-plugin' ),
-            function(){
-				?><input type="date" name="getDate" value="<?php 
-				$post_meta = get_post_meta(get_the_ID(),"EventDate")[0];
-				echo $post_meta ? date("Y-m-d", $post_meta) : date("Y-m-d") ?>"> <?php
-			},
-			$screen,
-			'side'
-        );
-    }
+		foreach ( $screens as $screen ) {
+			add_meta_box(
+				'date',
+				__( 'Date', 'zlatex-plugin' ),
+				function() {
+					$post_meta = get_post_meta( get_the_ID(), 'EventDate' )[0];
+					?><input type="date" name="getDate" value="<?php echo $post_meta ? date( 'Y-m-d', $post_meta ) : date( 'Y-m-d' ); ?>"> 
+					<?php
+				},
+				$screen,
+				'side'
+			);
+			add_meta_box(
+				'important_persons',
+				__( 'Important persons', 'zlatex-plugin' ),
+				function() {
+					?>
+					<div class="inputs-list"></div>
+					<button class="button button-add-input blue">Add new Person</button>
+					<?php
+				},
+				$screen,
+			);
+			add_meta_box(
+				'posts_search',
+				__( 'Select posts', 'zlatex-plugin' ),
+				function() {
+					$posts_meta = get_post_meta( get_the_ID(), 'selected_posts' )[0];
+					$posts = get_posts( array(
+						'numberposts' => -1,
+						'category'    => 0,
+						'orderby'     => 'date',
+						'order'       => 'DESC',
+						'include'     => array(),
+						'exclude'     => array(),
+						'meta_key'    => '',
+						'meta_value'  =>'',
+						'post_type'   => 'post',
+						'suppress_filters' => true, 
+					) );
+					?>
+					<select class="post-search" data-trigger name="choices-multiple-default" id="choices-multiple-default" placeholder="Select Posts" multiple>
+						<?php
+							foreach($posts_meta as $post){
+								
+								?>
+								<option value="<?php echo $post["post_id"] ?>" selected><?php echo $post["post_title"] ?></option>
+								<?php
+							}
+						?>
+						<?php
+							
+							foreach ($posts as $post ){?>
+							
+								<option value="<?php echo $post->ID ?>"><?php echo $post->post_title ?></option> <?php
+							}
+						?>
+						<!-- <option value="Choice 1" selected>Choice 1</option>
+						<option value="Choice 2">Choice 2</option>
+						<option value="Choice 3">Choice 3</option> -->
+						<!-- <option value="Choice 4" disabled>Choice 4</option> -->
+					</select>
+					<?php
+				},
+				$screen,
+			);
+		}
 	}
-	public function post_saved($post_ID){
-		if($_POST["getDate"]){
-			$orgDate = $_POST["getDate"];
-			update_post_meta($post_ID,"EventDate",strtotime($orgDate));
+	public function post_saved( $post_ID ) {
+		if ( $_POST['getDate'] ) {
+			$orgDate = $_POST['getDate'];
+			update_post_meta( $post_ID, 'EventDate', strtotime( $orgDate ) );
+		}
+		if($_POST['name'] && $_POST['surname'] && $_POST['link']){
+			$data = [
+				"name" => $_POST['name'],
+				"surname" => $_POST['surname'],
+				"link" => $_POST['link']
+			];
+			update_post_meta( $post_ID, 'boxes', $data );
 		}
 	}
 	public function setup() {
@@ -243,7 +321,7 @@ class Zlatex_Plugin_Admin {
 					?>
 					 checked <?php } ?>><label for="pg">Pagination</label></p>
 					 <h3><label for="custom-css">Custom CSS</label></h3>
-					 <textarea name="custom-css" id="custom-css" cols="90" rows="30"><?php echo get_option( 'custom-css' ) ?></textarea>
+					 <textarea name="custom-css" id="custom-css" cols="90" rows="30"><?php echo get_option( 'custom-css' ); ?></textarea>
 					<?php
 						settings_fields( 'old-events-settings-group' );     // скрытые защитные поля
 						do_settings_sections( 'old-events-settings-group' ); // секции с настройками (опциями).
@@ -254,7 +332,7 @@ class Zlatex_Plugin_Admin {
 			<?php
 
 		}
-		function generateShortcodePage(){
+		function generateShortcodePage() {
 			?>
 			<div class="wrap">
 				<h2><?php echo get_admin_page_title(); ?></h2>
@@ -278,15 +356,15 @@ class Zlatex_Plugin_Admin {
 				<h3><label>FROM DATE</label></h3>
 				<input style="width: 1000px;" type="text" id="shortcode" readonly value="123"> 
 					<?php
-						submit_button("Get Shortcode");
+						submit_button( 'Get Shortcode' );
 					?>
 				</form>
 			</div>
 			<?php
 
 		}
-		}
-	
+	}
+
 	public function my_plugin_rest_route_for_post( $route, $post ) {
 		if ( $post->post_type === 'old_events' ) {
 			$route = '/wp/v2/old_events/' . $post->ID;
@@ -294,37 +372,42 @@ class Zlatex_Plugin_Admin {
 
 		return $route;
 	}
-	public function addShortcode(){
-		add_shortcode('events', function ($atts){
-			$args = array(
-				"post_type" => "old_events",
-				"posts_per_page" => isset($atts["fromdate"]) && isset($atts["todate"]) ? -1 : $atts["last"] | 5
-			);
-			$q = new WP_Query($args);
-			if ( $q->have_posts() && is_singular() && in_the_loop()) {
-				
-				while ($q->have_posts() ) {
-					$q->the_post();
-					$showed = false;
-					if($atts["importance"]){
-						foreach(get_the_terms(get_the_ID(),"importance") as $term){
-							if($term->name >= $atts["importance"]){
-								$showed = true;
+	public function addShortcode() {
+		add_shortcode(
+			'events',
+			function ( $atts ) {
+				$args = array(
+					'post_type'      => 'old_events',
+					'posts_per_page' => isset( $atts['fromdate'] ) && isset( $atts['todate'] ) ? -1 : $atts['last'] | 5,
+				);
+				$q    = new WP_Query( $args );
+				if ( $q->have_posts() && is_singular() && in_the_loop() ) {
+
+					while ( $q->have_posts() ) {
+						$q->the_post();
+						$showed = false;
+						if ( $atts['importance'] ) {
+							foreach ( get_the_terms( get_the_ID(), 'importance' ) as $term ) {
+								if ( $term->name >= $atts['importance'] ) {
+									$showed = true;
+								}
 							}
 						}
+						$post_date = get_post_meta( get_the_ID(), 'EventDate' )[0];
+						if ( strtotime( $atts['fromdate'] ) <= $post_date && strtotime( $atts['todate'] ) >= $post_date && $showed ) {
+							?>
+						 <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a> 
+							<?php
+						} elseif ( ! $atts['fromdate'] && ! $atts['todate'] && $atts['last'] && $showed ) {
+							?>
+						 <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a> 
+							<?php
+						}
 					}
-					$post_date = get_post_meta(get_the_ID(),"EventDate")[0];
-					if(strtotime($atts["fromdate"]) <= $post_date && strtotime($atts["todate"]) >= $post_date && $showed){
-						?> <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a> <?php
-					}else if( !$atts["fromdate"] && !$atts["todate"] && $atts["last"] && $showed){
-						?> <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a> <?php
-					}
-					
-
 				}
-			}
 
-		});
+			}
+		);
 
 	}
 
