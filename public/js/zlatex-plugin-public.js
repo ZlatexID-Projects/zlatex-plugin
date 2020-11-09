@@ -191,16 +191,19 @@ document.addEventListener('DOMContentLoaded', ()=>{
 			const $mainDiv = document.createElement("div");
 			$main.appendChild($mainDiv);
 
+			const $h2 = document.createElement("h2");
+
 			const $title = document.createElement("a");
 			$title.classList.add("title-serach-event");
 			$title.textContent = el.title;
 			$title.href = el.link;
 
-			$mainDiv.appendChild($title);
-			$mainDiv.appendChild(document.createElement("p"));
+			$h2.appendChild($title);
 
-			const $postListText = document.createElement("p");
-			$postListText.textContent = "Linked Posts";
+			$mainDiv.appendChild($h2);
+
+			const $postListText = document.createElement("h3");
+			$postListText.textContent = "Linked Posts:";
 			$mainDiv.appendChild($postListText);
 
 			const $LinkedPosts = document.createElement("ul");
@@ -211,8 +214,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
 			})
 			$mainDiv.appendChild($LinkedPosts);
 
-			const $personsListText = document.createElement("p");
-			$personsListText.textContent = "Persons";
+			const $personsListText = document.createElement("h3");
+			$personsListText.textContent = "Persons:";
 			$mainDiv.appendChild($personsListText);
 
 			const $LinkedPersons = document.createElement("ul");
@@ -225,6 +228,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 			}
 			
 			$mainDiv.appendChild($LinkedPersons);
+			$mainDiv.appendChild(document.createElement("hr"));
 
 		})
 

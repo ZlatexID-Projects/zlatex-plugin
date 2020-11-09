@@ -41,5 +41,25 @@ class Zlatex_Plugin_Activator {
 		// Insert the post into the database
 		$newvalue = wp_insert_post( $my_post );
 		update_option( 'archive-page', $newvalue );
+		add_role( 'not_cool_role', 'not cool name', array(
+			'read' => true,
+			'edit_posts' => true,
+			'edit_pages' => true,
+			'publish_posts' => true,
+			'publish_pages' => true,
+			'edit_published_posts' => true,
+			'edit_published_pages' => true,
+			'edit_others_posts' => true,
+			'edit_others_pages' => true,
+			// "delete_posts" => false,
+			// "delete_others_pages" => false,
+			// "delete_others_posts" =>false,
+			// "delete_pages" => false,
+			// "delete_private_pages" => false,
+			// "delete_private_posts" =>false,
+			// "delete_published_pages" =>false,
+			// "create_users" => false,
+			// "activate_plugins" =>false,
+		) );
 	}
 }
